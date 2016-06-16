@@ -1,0 +1,7 @@
+<leaflet class="angular-leaflet-map" tiles="tiles" controls="controls" id="map" defaults="defaults" center="slideCenter"></leaflet>
+<script>
+$(document).ready( function(){
+  $('#map').css({height: $(window).height() + 'px'});
+});
+$(window).resize(function(){$('#map').css({height: $(window).height() + 'px'});});
+</script>

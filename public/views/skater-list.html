@@ -1,0 +1,18 @@
+<div class="container">
+    <form ng-submit="addSkater(newSkater)">
+        <input class="form-control" type="text" ng-model="newSkater.derbyName" name="text" />
+        <button type="submit" class="btn btn-success">Submit</button>
+    </form>
+    <table class="table table-striped">
+        <caption>Skaters:</caption>
+        <tbody>
+            <tr ng-repeat="skater in skaters">
+                <td ng-click="editSkater()">
+                    {{$id}}
+                </td>
+                <td>{{skater.derbyName}}</td>
+                <td>{{skater}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
