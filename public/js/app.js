@@ -1,37 +1,55 @@
-var config = {
-    apiKey: "AIzaSyAIZZxVn14qPES4cyoWBcl6MU0aCdsbSss",
-    authDomain: "nerdy-web.firebaseapp.com",
-    databaseURL: "https://nerdy-web.firebaseio.com",
-    storageBucket: "nerdy-web.appspot.com",
-};
+var app = angular.module('nerdy', ['firebase', 'ui.bootstrap', 'signature']);
 
-firebase.initializeApp(config);
+function dataURItoBlob(dataURI) {
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var byteString = atob(dataURI.split(',')[1]);
 
-var app = angular.module('nerdy', ['ngRoute', 'firebase', 'ui.bootstrap'])
-    .config(['$locationProvider', '$routeProvider',
-        function config($locationProvider, $routeProvider) {
-            // $locationProvider.hashPrefix('!');
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
 
-            $routeProvider.
-            when('/', {
-                templateUrl: 'views/skater-list.html',
-                controller: 'MainCtrl'
-            }).
-            when('/:collectionId', {
-                templateUrl: 'views/collection-detail.html',
-                controller: 'CollectionCtrl'
-            }).
-            when('/:collectionId/:caseId/:slideId', {
-                templateUrl: 'views/slide.html',
-                controller: 'SlideCtrl'
-            }).
-            otherwise('/');
-        }
-    ]);
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
+
+    // write the ArrayBuffer to a blob, and you're done
+    var bb = new BlobBuilder();
+    bb.append(ab);
+    return bb.getBlob(mimeString);
+}
+
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {
+        type: mime
+    });
+}
+
+app.run(function($rootScope) {
+    var config = {
+        apiKey: "AIzaSyA-Qq5Uafa7SpfNEUkdAh4khBZcjC6sk6U",
+        authDomain: "crossover-5f313.firebaseapp.com",
+        databaseURL: "https://crossover-5f313.firebaseio.com",
+        storageBucket: "crossover-5f313.appspot.com",
+    };
+
+    firebase.initializeApp(config);
+});
 
 app.controller('MainCtrl', function($scope, $firebaseArray) {
     $scope.newSkater = {};
     var ref = firebase.database().ref().child("skaters");
+    $scope.imageStorage = firebase.storage().ref().child('images/');
     // create a synchronized array
     // click on `index.html` above to see it used in the DOM!
     $scope.skaters = $firebaseArray(ref);
@@ -48,6 +66,31 @@ app.controller('MainCtrl', function($scope, $firebaseArray) {
 
     $scope.editSkater = function() {
         $scope.newSkater = this.skater;
+    }
+
+    $scope.sign = function() {
+        var signature = $scope.accept();
+        console.log(signature);
+        var sigFile = $scope.imageStorage.child(Date.now() + ".png");
+        console.log(sigFile);
+        var blob = dataURLtoBlob(signature.dataUrl);
+        console.log(blob);
+        var uploadTask = sigFile.put(blob);
+        console.log(uploadTask);
+        uploadTask.on('state_changed', function(snapshot) {
+            // Observe state change events such as progress, pause, and resume
+            // See below for more detail
+            console.log(snapshot);
+        }, function(error) {
+            // Handle unsuccessful uploads
+            console.log(error);
+        }, function() {
+            // Handle successful uploads on complete
+            // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+            var downloadURL = uploadTask.snapshot.downloadURL;
+            console.log(uploadTask);
+            console.log(uploadTask.snapshot);
+        });
     }
 });
 
@@ -68,75 +111,4 @@ app.controller('NavbarCtrl', function($scope, $firebaseAuth) {
                 });
         }
     }
-});
-
-app.controller('CollectionCtrl', function($scope, $firebaseObject, $routeParams) {
-    console.log($routeParams);
-    var ref = firebase.database().ref().child("collections/" + $routeParams.collectionId);
-    // download the data into a local object
-    var syncObject = $firebaseObject(ref);
-    // synchronize the object with a three-way data binding
-    // click on `index.html` above to see it used in the DOM!
-    syncObject.$bindTo($scope, "collection");
-});
-
-app.controller('SlideCtrl', function($scope, $firebaseObject, $routeParams, leafletData) {
-    var ref = firebase.database().ref().child("collections/" + $routeParams.collectionId);
-    console.log(ref);
-    // download the data into a local object
-    var syncObject = $firebaseObject(ref);
-    // synchronize the object with a three-way data binding
-    // click on `index.html` above to see it used in the DOM!
-    syncObject.$bindTo($scope, "collection");
-    console.log($scope);
-
-    leafletData.getMap("map").then(function(map) {
-        map.attributionControl.setPrefix('');
-    });
-    $scope.contributors = ['Regents of the University of Minnesota'];
-
-    angular.extend($scope, {
-        slideCenter: {
-            lat: 0,
-            lng: 0,
-            zoom: 2
-        },
-        defaults: {
-            maxZoom: 8,
-            noWrap: true,
-            continuousWorld: false
-        },
-        tiles: {
-            url: '',
-            options: {
-                continuousWorld: false,
-                noWrap: true,
-                attribution: 'Images &copy; 2016 Regents of the University of Minnesota'
-            }
-        },
-        controls: {
-            fullscreen: {
-                position: 'topleft'
-            }
-        }
-    });
-
-    $scope.$watch(
-        "collection",
-        function handleCollectionChange(newValue, oldValue) {
-            $scope.case = $scope.collection.cases[$routeParams.caseId];
-            console.log($scope.case);
-            $scope.slide = $scope.case.slides[$routeParams.slideId];
-            console.log($scope.slide);
-            $scope.collectionYear = new Date($scope.collection.date).getFullYear();
-            if ('contact' in $scope.collection) {
-                // If a contact is given for a collection, credit them first in the attribution, with their name followed by their titles/credentials
-                $scope.contributors.unshift([$scope.collection.contact.name, $scope.collection.contact.titles.join(' ')].join(' '));
-            };
-            $scope.tiles.options.attribution = 'Images &copy; ' + $scope.collectionYear + ' ' + $scope.contributors.join(' and ');
-            $scope.tiles.url = 'http://slides.pathology.umn.edu/' + $scope.collection.date + '/' + $scope.slide + '/{z}/{y}/{x}.jpg'
-        }
-    );
-
-    console.log($scope.tiles);
 });
