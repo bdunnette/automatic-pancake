@@ -26,9 +26,12 @@
     "firebase": "^3.1.0",
     "bootstrap": "^3.3.6",
     "angular-bootstrap": "^1.3.3",
-    "signature_pad": "^1.5.3"
+    "angular-sanitize": "^1.5.7",
+    "angular-schema-form": "^0.8.13",
+    "angular-schema-form-signature": "^0.1.1"
   },
   "resolutions": {
-    "signature_pad": "^1.5.3"
+    "angular-signature": "2way-dataurl",
+    "signature_pad": "~1.3"
   }
 }
