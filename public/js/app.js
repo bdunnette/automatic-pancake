@@ -1,4 +1,4 @@
-var app = angular.module('nerdy', ['firebase', 'ui.bootstrap', 'ui.select', 'signature', 'ngSanitize']);
+var app = angular.module('nerdy', ['firebase', 'ui.bootstrap', 'ui.select', 'signature']);
 
 function dataURItoBlob(dataURI) {
     // convert base64 to raw binary data held in a string
