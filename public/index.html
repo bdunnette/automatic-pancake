@@ -8,7 +8,7 @@
         <!-- <link rel="stylesheet" href="css/bootstrap.css" /> -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans|Oswald:700" rel="stylesheet">
-<link rel="stylesheet" href="vendor/angular-ui-select/dist/select.css">
+        <link rel="stylesheet" href="vendor/angular-ui-select/dist/select.css">
         <script>
             document.write('<base href="' + document.location + '" />');
         </script>
@@ -46,13 +46,25 @@
         </nav>
 
         <div class="container" ng-controller="MainCtrl">
+            <script type="text/ng-template" id="myModalContent.html">
+                <div class="modal-header">
+                    <h3 class="modal-title">Sign</h3>
+                </div>
+                <div class="modal-body">
+                    <signature-pad accept="accept" clear="clear" height="200"></signature-pad>
+                    <hr noshade />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default pull-left" ng-click="clear()">Clear signature</button>
+                    <button class="btn btn-default" ng-click="$dismiss()">Cancel</button>
+                    <button class="btn btn-primary" ng-click="done()">Sign</button>
+                </div>
+            </script>
             <form ng-submit="addSkater(newSkater)">
                 <input class="form-control" type="text" ng-model="newSkater.derbyName" name="text"/>
                 <button type="submit" class="btn btn-success">Submit</button>
             </form>
-            <signature-pad accept="accept" clear="clear"></signature-pad>
-            <button class="btn btn-warning" ng-click="clear()">Clear signature</button>
-            <button class="btn btn-primary" ng-click="sign()">Sign</button>
+            <button type="button" class="btn btn-default" ng-click="open()">Open me!</button>
             <table class="table table-striped">
                 <caption>Skaters:</caption>
                 <tbody>
@@ -80,7 +92,7 @@
         <script src="vendor/jquery/dist/jquery.js"></script>
         <script src="vendor/bootstrap/dist/js/bootstrap.js"></script>
         <script src="vendor/angular-bootstrap/ui-bootstrap-tpls.js"></script>
-<script src="vendor/angular-ui-select/dist/select.js"></script>
+        <script src="vendor/angular-ui-select/dist/select.js"></script>
         <script src="vendor/signature_pad/signature_pad.js"></script>
         <script src="vendor/angular-signature/src/signature.js"></script>
         <script src="js/app.js"></script>

@@ -46,7 +46,7 @@ app.run(function($rootScope) {
     firebase.initializeApp(config);
 });
 
-app.controller('MainCtrl', function($scope, $firebaseArray) {
+app.controller('MainCtrl', function($scope, $firebaseArray, $uibModal, $log) {
     $scope.newSkater = {};
     var ref = firebase.database().ref().child("skaters");
     $scope.imageStorage = firebase.storage().ref().child('images/');
@@ -67,6 +67,76 @@ app.controller('MainCtrl', function($scope, $firebaseArray) {
     $scope.editSkater = function() {
         $scope.newSkater = this.skater;
     }
+
+    $scope.open = function() {
+
+        var modalInstance = $uibModal.open({
+            animation: false,
+            templateUrl: 'myModalContent.html',
+            controller: 'SignModalCtrl',
+            resolve: {
+                skaters: function() {
+                    return $scope.skaters;
+                }
+            }
+        });
+
+        modalInstance.result.then(function(signature) {
+            $scope.signature = signature;
+        }, function() {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
+    }
+});
+
+app.controller('NavbarCtrl', function($scope, $firebaseAuth) {
+    $scope.authObj = $firebaseAuth();
+    $scope.firebaseUser = $scope.authObj.$getAuth();
+
+    $scope.login = function(authType) {
+        switch (authType) {
+            case 'facebook':
+            default:
+                // login with Google
+                $scope.authObj.$signInWithPopup(authType).then(function(firebaseUser) {
+                    console.log("Signed in as:", firebaseUser.uid);
+                    console.log($scope.authObj.$getAuth());
+                }).catch(function(error) {
+                    console.log("Authentication failed:", error);
+                });
+        }
+    }
+});
+
+app.controller('SignModalCtrl',
+
+    function($scope, $uibModalInstance) {
+        $scope.done = function() {
+            var signature = $scope.accept();
+
+            if (signature.isEmpty) {
+                $uibModalInstance.dismiss();
+            } else {
+                $uibModalInstance.close(signature.dataUrl);
+            }
+        };
+    }
+);
+
+app.controller('ModalInstanceCtrl', function($scope, $uibModalInstance, skaters) {
+
+    $scope.skaters = skaters;
+    $scope.selected = {
+        item: $scope.skaters[0]
+    };
+
+    $scope.ok = function() {
+        $uibModalInstance.close($scope.selected.item);
+    };
+
+    $scope.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    };
 
     $scope.sign = function() {
         var signature = $scope.accept();
@@ -91,24 +161,5 @@ app.controller('MainCtrl', function($scope, $firebaseArray) {
             console.log(uploadTask);
             console.log(uploadTask.snapshot);
         });
-    }
-});
-
-app.controller('NavbarCtrl', function($scope, $firebaseAuth) {
-    $scope.authObj = $firebaseAuth();
-    $scope.firebaseUser = $scope.authObj.$getAuth();
-
-    $scope.login = function(authType) {
-        switch (authType) {
-            case 'facebook':
-            default:
-                // login with Google
-                $scope.authObj.$signInWithPopup(authType).then(function(firebaseUser) {
-                    console.log("Signed in as:", firebaseUser.uid);
-                    console.log($scope.authObj.$getAuth());
-                }).catch(function(error) {
-                    console.log("Authentication failed:", error);
-                });
-        }
-    }
+    };
 });
