@@ -1,2 +1,2 @@
-#!/bin/sh
-browser-sync start --config bs-config.js
+#!/bin/bash
+/usr/bin/env browser-sync start --config bs-config.js
