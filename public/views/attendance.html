@@ -1,0 +1,24 @@
+<md-content class="md-padding" layout="column">
+  <div class="row">
+  <signature-pad class="md-whiteframe-1dp" accept="accept" clear="clear" height="220" width="568" dataurl="dataurl"></signature-pad>
+  <div class="signature-buttons column">
+    <md-button ng-click="clear()">Clear</md-button>
+                <md-button ng-click="dataurl = signature.dataUrl" ng-disabled="!signature">Reset</md-button>
+                <md-button ng-click="signature = accept()">Sign</md-button>
+  </div>
+  </div>
+  <div class="row">
+    <md-card ng-repeat="p in participants">
+        <md-card-title>
+            <md-card-title-text>
+                <span class="md-headline">{{p.name}}</span>
+                <!-- <span class="md-subhead">Large</span> -->
+            </md-card-title-text>
+        </md-card-title>
+        <md-card-actions layout="row" layout-align="end center">
+            <md-button>Sign In</md-button>
+            <md-button>Sign Out</md-button>
+        </md-card-actions>
+    </md-card>
+    </div>
+</md-content>
