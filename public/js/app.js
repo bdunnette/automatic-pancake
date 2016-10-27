@@ -92,8 +92,11 @@ app.controller('NavbarCtrl', function($scope, $firebaseAuth) {
 });
 
 app.controller('AttendanceCtrl', function($scope, $firebaseArray, $mdDialog) {
+    var storageRef = firebase.storage().ref().child("images");
     var ref = firebase.database().ref().child("participants");
     $scope.participants = $firebaseArray(ref);
+    $scope.editingImage = {};
+
     var _video = null,
         patData = null;
 
@@ -150,8 +153,26 @@ app.controller('AttendanceCtrl', function($scope, $firebaseArray, $mdDialog) {
 
             var idata = getVideoData($scope.patOpts.x, $scope.patOpts.y, $scope.patOpts.w, $scope.patOpts.h);
             ctxPat.putImageData(idata, 0, 0);
-
-            sendSnapshotToServer(patCanvas.toDataURL());
+            console.log(patCanvas);
+            patCanvas.toBlob(function(blob) {
+                var imageName = Date.now().toString();
+                console.log(imageName);
+                var uploadTask = storageRef.child(imageName + '.png').put(blob);
+                uploadTask.on('state_changed', function(snapshot) {
+                    // Observe state change events such as progress, pause, and resume
+                    // See below for more detail
+                }, function(error) {
+                    // Handle unsuccessful uploads
+                    console.error(error);
+                }, function() {
+                    // Handle successful uploads on complete
+                    // For instance, get the download URL: https://firebasestorage.googleapis.com/...
+                    var downloadURL = uploadTask.snapshot.downloadURL;
+                    console.log(uploadTask.snapshot);
+                    $scope.editingImage.url = downloadURL;
+                    console.log($scope.editingImage);
+                });
+            })
 
             patData = idata;
         }
