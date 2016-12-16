@@ -98,11 +98,11 @@ app.controller('AttendanceCtrl', function($scope, $firebaseArray, $mdDialog) {
     $scope.showDialog = function(ev) {
         $mdDialog.show({
                 controller: SignInOutController,
-                templateUrl: 'views/sign-in-out.tmpl.html',
+                templateUrl: 'views/sign-in-out.html',
                 parent: angular.element(document.body),
                 targetEvent: ev,
                 clickOutsideToClose: true,
-                fullscreen: true
+                fullscreen: false
             })
             .then(function(answer) {
                 console.log(answer);
